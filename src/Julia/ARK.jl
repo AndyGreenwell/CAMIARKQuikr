@@ -52,11 +52,11 @@ end
 #Parse the args
 parsed_args = parse_commandline()
 input_file = parsed_args["input_file"]
-lambda = int(parsed_args["lambda"])
+lambda = Int64(parsed_args["lambda"])
 output_file = parsed_args["output_file"]
 kmer_counts_per_sequence_path = parsed_args["kmer_counts_per_sequence_path"]
 training_database = parsed_args["training_database"]
-number_of_clusters = int(parsed_args["number_of_clusters"])
+number_of_clusters = parse(Int,parsed_args["number_of_clusters"])
 clustering_type = parsed_args["clustering_type"]
 
 k=6;
@@ -69,11 +69,11 @@ k=6;
 #Write as sparse format as this saves both time and space
 #Put a random suffix on it just in case there are multiple ones running
 suffix = abs(rand(Int,1));
-success(`$kmer_counts_per_sequence_path -i $input_file -k $k -c -s ` |> "Julia_temp_file_$(suffix[1]).txt");
+success(pipeline(`$kmer_counts_per_sequence_path -i $input_file -k $k -c -s ` , "Julia_temp_file_$(suffix[1]).txt"));
 counts_per_sequence_dlm = readdlm("Julia_temp_file_$(suffix[1]).txt", '\t'); #Read in sparse format (I,J,V)
 success(`rm Julia_temp_file_$(suffix[1]).txt`)
-I = int(counts_per_sequence_dlm[:,1].+1);
-J = int(counts_per_sequence_dlm[:,2].+1);
+I = convert(Vector{Int},round(Int,counts_per_sequence_dlm[:,1].+1));
+J = convert(Vector{Int},round(Int,counts_per_sequence_dlm[:,2].+1));
 V = counts_per_sequence_dlm[:,3];
 #Make sure the dimension is correct
 counts_per_sequence_sparse = sparse(I, J, V, maximum(I), 4^k); #Convert to sparse matrix

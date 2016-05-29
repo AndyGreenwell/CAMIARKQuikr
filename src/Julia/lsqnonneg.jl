@@ -63,14 +63,14 @@ function lsqnonneg(C::Matrix, d::Vector, tol::Real=-1, itmax_factor::Real=3)
 			end
 			
 			# Find indices where intermediate solution z is approximately negative
-			Q = [(z .<= 0) & P];
+			Q = collect((z .<= 0) & P);
 
 			# Choose new x subject to keeping new x nonnegative
 			alpha = minimum(x[Q]./(x[Q] - z[Q]));
 			x = x + alpha*(z - x);
 
 			# Reset Z and P given intermediate values of x
-			Z = [((abs(x) .< tol) & P) | Z ];
+			Z = collect(((abs(x) .< tol) & P) | Z );
 			P = ~Z;
 			z = zeros(n,1);           # Reset z
 			z[P] = C[:,find(P)]\d;      # Re-solve for z

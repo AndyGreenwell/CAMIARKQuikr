@@ -7,7 +7,7 @@
 # ==============================================================================
 
 function ConvertToCAMIOutput(input, taxonomy_file, output_level, output_file)
-	output_taxonomic_rank = [1:7]
+	output_taxonomic_rank = collect(1:7)
 	sample_ID="SAMPLEID"
 
 	#Next, read in the taxonomy file
@@ -28,12 +28,12 @@ function ConvertToCAMIOutput(input, taxonomy_file, output_level, output_file)
 		support = indicies_of_interest[find(input[indicies_of_interest] .> cutoff)] #Support in the indicies of interest
 		nonzero_taxonomy = taxonomy[(support .- (num_organisms*(output_level-1)))] #Shift everything left to the start since taxonomy has only num_organisms length
 	elseif output_level==0
-		if ~(int(length(input)/num_organisms)==length(input)/num_organisms)
+		if ~(Int64(length(input)/num_organisms)==length(input)/num_organisms)
 			error("Input reconstruction is not a multiple of the number of organisms in the taxonomy file")
 		else
 			#Then add up each chunk of size num_organisms
 			input_temp = zeros(num_organisms);
-			for output_level_temp = 1:int(length(input)/num_organisms)
+			for output_level_temp = 1:round(Int,length(input)/num_organisms)
 				input_temp = input_temp + input[((output_level_temp-1) * num_organisms + 1):(output_level_temp * num_organisms)];
 			end
 			cutoff = .00001
@@ -72,7 +72,7 @@ function ConvertToCAMIOutput(input, taxonomy_file, output_level, output_file)
 			nonzero_taxonomy_split = split(taxonomy_string,"|")
 			if length(nonzero_taxonomy_split) >= taxa_rank
 				taxa_name = join(nonzero_taxonomy_split[1:taxa_rank],"|")
-				append!(taxa_names, {taxa_name})
+				append!(taxa_names, Any[taxa_name])
 			end
 		end
 		unique_taxa_names = sort(unique(taxa_names)); #This assumes that there's a bijection between taxa names and tax IDs
